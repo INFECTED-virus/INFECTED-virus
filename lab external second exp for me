@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define QUEUE_MAX_SIZE 200
+#define EV 2147483647
+
+typedef struct queue_struct {
+    int* front;
+    int* rear;
+    int size;
+} queue;
+
+queue* new_queue() {
+    queue* q = malloc(sizeof(queue));
+    q->front = malloc(sizeof(int) * QUEUE_MAX_SIZE);
+    q->rear = q->front;
+    return q;
+}
+
+
+int enqueue(queue* q, int v) {
+    if(q->size == QUEUE_MAX_SIZE) return -1;
+    *q->rear = v;
+    *q->rear++;
+    q->size++;
+    return 0;
+}
+
+void shleft(queue* q) {
+    for(int i = 0; i < q->size - 1; i++) {
+        *(q->front + i) = *(q->front + i + 1);
+    }
+}
+
+int dequeue(queue* q) {
+    if(q->size == 0) return EV;
+    int v = *q->front;
+    shleft(q);
+    q->rear--;
+    q->size--;
+    return v;
+}
+
+int main() {
+    char inp[100], dump[100], rstr[100];
+    int in;
+    puts("Queue interactive");
+    queue* q = new_queue();
+    while (1) {
+        printf(">>> ");
+        fgets(inp, 99, stdin);
+        sscanf(inp, "%s", rstr);
+        if(!strcmp("enqueue", rstr) || !strcmp("enq", rstr)) {
+            sscanf(inp, "%s %d", dump, &in);
+            if (enqueue(q, in)) fputs("Queue overflow.\n", stderr);
+        }
+        else if (!strcmp("dequeue", rstr) || !strcmp("deq", rstr)) {
+            int s = 0;
+            if ((s = dequeue(q)) == EV) fputs("Queue underflow.\n", stderr);
+            else(printf("%d\n", s));
+        }
+        else if(!strcmp("size", rstr)) {
+            printf("%d\n", q->size);
+        }
+        else if(!strcmp("exit", rstr) || !strcmp("quit", rstr)) {
+            return 0;
+        }
+    }
+}
